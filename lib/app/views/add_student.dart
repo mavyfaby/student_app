@@ -10,8 +10,7 @@ class AddStudentPage extends StatefulWidget {
 
 class _AddStudentPageState extends State<AddStudentPage> {
   final TextEditingController _nameController = TextEditingController();
-  int course = -1;
-
+  String course = "";
   String errorMessage = "";
   int? errorType;
 
@@ -30,6 +29,8 @@ class _AddStudentPageState extends State<AddStudentPage> {
                 const SizedBox(height: 42),
                 Icon(Icons.add_photo_alternate_outlined, size: 150, color: Theme.of(context).colorScheme.secondary),
                 const SizedBox(height: 24),
+
+                // Student name
                 TextField(
                   controller: _nameController,
                   decoration:  InputDecoration(
@@ -40,6 +41,8 @@ class _AddStudentPageState extends State<AddStudentPage> {
                   ),
                 ),
                 const SizedBox(height: 28),
+
+                // Course
                 DropdownButtonFormField(
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.school_outlined),
@@ -47,17 +50,19 @@ class _AddStudentPageState extends State<AddStudentPage> {
                     errorText: errorType == 2 ? errorMessage : null,
                     label: const Text("Course")
                   ),
-                  items: courses.map((e) => DropdownMenuItem(value: e["value"], child: Text(e["name"]))).toList(),
+                  items: courses.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                   onChanged: (value) {
                     setState(() {
                       errorMessage = "";
                       errorType = 0;
                     });
 
-                    course = int.parse(value!.toString());
+                    course = value.toString();
                   }
                 ),
                 const SizedBox(height: 32),
+
+                // Actions
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -90,8 +95,9 @@ class _AddStudentPageState extends State<AddStudentPage> {
     );
   }
 
-  void addStudent(String name, int course) {
+  void addStudent(String name, String course) {
     name = name.trim();
+    course = course.trim();
 
     setState(() {
       errorMessage = "";
@@ -107,7 +113,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
       return;
     }
 
-    if (course == -1) {
+    if (course.isEmpty) {
       setState(() {
         errorMessage = "Please select a course!";
         errorType = 2;
@@ -115,7 +121,5 @@ class _AddStudentPageState extends State<AddStudentPage> {
 
       return;
     }
-
-    
   }
 }

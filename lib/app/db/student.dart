@@ -1,18 +1,56 @@
+import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:studentapp/app/core/student.dart';
 
 class StudentDatabase {
   static final StudentDatabase _studentDatabase = StudentDatabase._internal();
+  static StudentDatabase get instance => _studentDatabase;
   static Database? db;
 
-  factory StudentDatabase(Database d) {
-    db = d;
-    init();
-    return _studentDatabase;
+  static const String table = 'student';
+
+  // Get database instance
+  Future<Database> get database async {
+    if (db != null) {
+      return db!;
+    }
+
+    db = await _init();
+    return db!;
   }
 
-  static void init() async {
-    
+  // Initialize database
+  Future<Database> _init() async {
+    return await openDatabase(
+      join(await getDatabasesPath(), 'mavystudent.db'),
+      onCreate: (db, version) async {
+        // First time the database is created
+        await db.execute("CREATE TABLE $table (id INTEGER PRIMARY KEY, name TEXT, course TEXT)");
+        await db.execute("CREATE TABLE settings (id INTEGER PRIMARY KEY, name TEXT, value TEXT)");
+
+        // Insert dark mode setting
+        await db.insert("settings", {"name": "dark_mode", "value": "0"});
+      },
+      version: 1
+    );
   }  
+
+  // Get students
+  Future<List<Student>> getStudents() async {
+    final List<Map<String, Object?>> result = await (await database).query(table);
+    return result.map((e) => Student.fromMap(e)).toList();
+  }
+
+  // Update dark mode setting
+  void updateDarkmode(bool isDarkMode) async {
+    await (await database).update("settings", {"value": isDarkMode ? "1" : "0"}, where: "name = ?", whereArgs: ["dark_mode"]);
+  }
+  
+  /// Get dark mode setting
+  Future<bool> getDarkMode() async {
+    final List<Map<String, Object?>> result = await (await database).query("settings", where: "name = ?", whereArgs: ["dark_mode"]);
+    return result.first["value"] == "1" ? true : false;
+  }
 
   StudentDatabase._internal();
 }
