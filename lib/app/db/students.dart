@@ -41,6 +41,16 @@ class StudentDatabase {
     return result.map((e) => Student.fromMap(e)).toList();
   }
 
+  // Add student
+  Future<int> addStudent(Student student) async {
+    return await (await database).insert(table, student.toMap());
+  }
+
+  // Delete student
+  Future<bool> deleteStudent(Student student) async {
+    return await (await database).delete(table, where: "id = ?", whereArgs: [student.id]) > 0;
+  }
+
   // Update dark mode setting
   void updateDarkmode(bool isDarkMode) async {
     await (await database).update("settings", {"value": isDarkMode ? "1" : "0"}, where: "name = ?", whereArgs: ["dark_mode"]);

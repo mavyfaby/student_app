@@ -31,9 +31,10 @@ dependencies:
   flutter:
     sdk: flutter
 
-  animated_theme_switcher: ^2.0.7
   sqflite: ^2.2.5
   path: ^1.8.2
+  get: ^4.6.5
+  dough: ^1.0.4
 
 dev_dependencies:
   flutter_test:

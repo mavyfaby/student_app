@@ -1,8 +1,9 @@
-import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:studentapp/app/controllers/student_list.dart';
 
-import 'app/db/student.dart';
+import 'app/db/students.dart';
 import 'app/theme/theme.dart';
 import 'app/views/home.dart';
 
@@ -23,17 +24,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = isDarkMode ? darkTheme : lightTheme;
+    Get.put(StudentListController());
 
-    return ThemeProvider(
-      initTheme: theme,
-      builder: (_, theme) {
-        return MaterialApp(
-          title: 'Student app',
-          theme: theme,
-          home: const HomePage(),
-        );
-      }
+    return GetMaterialApp(
+      title: 'Student app',
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      home: const HomePage()
     );
   }
 }

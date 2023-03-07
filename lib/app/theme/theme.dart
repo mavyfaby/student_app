@@ -68,6 +68,16 @@ const darkColorScheme = ColorScheme(
   scrim: Color(0xFF000000),
 );
 
-// Theme
-ThemeData lightTheme = ThemeData(useMaterial3: true, colorScheme: lightColorScheme);
-ThemeData darkTheme = ThemeData(useMaterial3: true, colorScheme: darkColorScheme);
+// Light theme
+ThemeData lightTheme = ThemeData(
+  useMaterial3: true,
+  colorScheme: lightColorScheme,
+  brightness: Brightness.light
+);
+
+// Dark theme
+ThemeData darkTheme = ThemeData(
+  useMaterial3: true,
+  colorScheme: darkColorScheme,
+  brightness: Brightness.dark
+);

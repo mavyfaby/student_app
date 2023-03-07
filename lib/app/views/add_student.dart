@@ -1,5 +1,12 @@
+import 'package:dough/dough.dart';
 import 'package:flutter/material.dart';
-import 'package:studentapp/app/env/env.dart';
+import 'package:get/get.dart';
+import 'package:studentapp/app/global/util.dart';
+
+import '../controllers/student_list.dart';
+import '../env/env.dart';
+import '../core/student.dart';
+import '../db/students.dart';
 
 class AddStudentPage extends StatefulWidget {
   const AddStudentPage({super.key});
@@ -10,9 +17,10 @@ class AddStudentPage extends StatefulWidget {
 
 class _AddStudentPageState extends State<AddStudentPage> {
   final TextEditingController _nameController = TextEditingController();
-  String course = "";
-  String errorMessage = "";
-  int? errorType;
+
+  RxString course = "".obs;
+  RxString errorMessage = "".obs;
+  RxInt errorType = 0.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -27,63 +35,69 @@ class _AddStudentPageState extends State<AddStudentPage> {
             child: Column(
               children: [
                 const SizedBox(height: 42),
-                Icon(Icons.add_photo_alternate_outlined, size: 150, color: Theme.of(context).colorScheme.secondary),
+
+                PressableDough(
+                  child: Icon(Icons.add_photo_alternate_outlined, size: 150, color: Theme.of(context).colorScheme.secondary)
+                ),
+                
                 const SizedBox(height: 24),
 
                 // Student name
-                TextField(
+                Obx(() => TextField(
                   controller: _nameController,
                   decoration:  InputDecoration(
                     prefixIcon: const Icon(Icons.person_outline_rounded),
                     filled: true,
-                    errorText: errorType == 1 ? errorMessage : null,
+                    errorText: errorType.value == 1 ? errorMessage.value : null,
                     label: const Text("Student name")
                   ),
-                ),
+                )),
                 const SizedBox(height: 28),
 
                 // Course
-                DropdownButtonFormField(
+                Obx(() => DropdownButtonFormField(
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.school_outlined),
                     filled: true,
-                    errorText: errorType == 2 ? errorMessage : null,
+                    errorText: errorType.value == 2 ? errorMessage.value : null,
                     label: const Text("Course")
                   ),
+                  value: course.value.isEmpty ? null : course.value,
                   items: courses.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
                   onChanged: (value) {
-                    setState(() {
-                      errorMessage = "";
-                      errorType = 0;
-                    });
-
-                    course = value.toString();
+                    errorMessage.value ="";
+                    errorType.value = 0;
+                    course = value.toString().obs;
                   }
-                ),
+                )),
                 const SizedBox(height: 32),
 
                 // Actions
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    FilledButton.tonal(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text("Cancel")
+                    PressableDough(
+                      child: FilledButton.tonal(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        child: const Text("Cancel")
+                      ),
                     ),
                     const SizedBox(width: 8),
-                    FilledButton(
-                      onPressed: () {
-                        addStudent(_nameController.text, course); 
-                      },
-                      child: Row(
-                        children: const [
-                          Icon(Icons.add),
-                          SizedBox(width: 8),
-                          Text("Add student")
-                        ],
-                      )
+                    PressableDough(
+                      child: FilledButton(
+                        onPressed: () {
+                          addStudent(_nameController.text, course.value); 
+                        },
+                        child: Row(
+                          children: const [
+                            Icon(Icons.add),
+                            SizedBox(width: 8),
+                            Text("Add student")
+                          ],
+                        )
+                      ),
                     )
                   ],
                 )
@@ -95,31 +109,78 @@ class _AddStudentPageState extends State<AddStudentPage> {
     );
   }
 
-  void addStudent(String name, String course) {
+  void addStudent(String name, String? course) async {
     name = name.trim();
-    course = course.trim();
 
-    setState(() {
-      errorMessage = "";
-      errorType = 0;
-    });
+    errorMessage.value = "";
+    errorType.value = 0;
     
     if (name.isEmpty) {
-      setState(() {
-        errorMessage = "Name must not be empty!";
-        errorType = 1;
-      });
+      errorMessage.value = "Name must not be empty!";
+      errorType.value = 1;
 
       return;
     }
 
-    if (course.isEmpty) {
-      setState(() {
-        errorMessage = "Please select a course!";
-        errorType = 2;
-      });
+    if (course != null && course.isEmpty) {
+      errorMessage.value = "Please select a course!";
+      errorType.value = 2;
 
       return;
     }
+
+    // Show overlay loading
+    showOverlay("Adding student...");
+    // Remove focus
+    FocusScope.of(context).unfocus();
+    // Create a student
+    Student student = Student(name, course!);
+    // Add student to database
+    student.id = await StudentDatabase.instance.addStudent(student);
+    // Add student to list
+    Get.find<StudentListController>().addStudent(student);
+    // Hide overlay loading
+    Get.back();
+    // Show success dialog
+    showSuccess(student.name);
+  }
+
+  // Clear inputs
+  void _clearInputs() {
+    _nameController.clear();
+    course.value = "";
+  }
+
+  void showSuccess(String name) {
+    Get.dialog(
+      barrierDismissible: false,
+      WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
+          title: const Text("Success"),
+          content: Text("Student $name added successfully!"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Clear inputs
+                _clearInputs();
+                // Close this dialog
+                Get.back();
+              },
+              child: const Text("Close"),
+            ),
+            TextButton(
+              onPressed: () {
+                // Close this dialog
+                Get.back();
+                // Close current page
+                Get.back();
+              },
+              child: const Text("Go to home")
+            )
+          ],
+        )
+      )
+    );
   }
 }
