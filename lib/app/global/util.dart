@@ -19,3 +19,25 @@ void showOverlay(String message) {
       )
     );
 }
+
+// Enum for the type of error
+enum DialogType {
+  error,
+  success,
+}
+
+/// Show a dialog with a message
+void showCustomDialog(String title, String message, List<Widget> actions, { DialogType type = DialogType.success }) {
+  Get.dialog(
+    barrierDismissible: false,
+    WillPopScope(
+      onWillPop: () async => false,
+      child: AlertDialog(
+        backgroundColor: type == DialogType.error ? Get.theme.colorScheme.errorContainer : Get.theme.dialogBackgroundColor,
+        title: Text(title),
+        content: Text(message),
+        actions: actions,
+      )
+    )
+  );
+}

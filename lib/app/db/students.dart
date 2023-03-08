@@ -7,7 +7,7 @@ class StudentDatabase {
   static StudentDatabase get instance => _studentDatabase;
   static Database? db;
 
-  static const String table = 'student';
+  static const String table = 'students';
 
   // Get database instance
   Future<Database> get database async {
@@ -25,7 +25,7 @@ class StudentDatabase {
       join(await getDatabasesPath(), 'mavystudent.db'),
       onCreate: (db, version) async {
         // First time the database is created
-        await db.execute("CREATE TABLE $table (id INTEGER PRIMARY KEY, name TEXT, course TEXT)");
+        await db.execute("CREATE TABLE $table (id INTEGER PRIMARY KEY, name TEXT, image BLOB, course TEXT)");
         await db.execute("CREATE TABLE settings (id INTEGER PRIMARY KEY, name TEXT, value TEXT)");
 
         // Insert dark mode setting

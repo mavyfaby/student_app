@@ -1,10 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:staggered_grid_view_flutter/widgets/staggered_grid_view.dart';
+import 'package:staggered_grid_view_flutter/widgets/staggered_tile.dart';
+import 'package:studentapp/app/global/util.dart';
 
 import '../controllers/student_list.dart';
 import '../core/card.dart';
 import '../core/student.dart';
 import '../db/students.dart';
+import '../global/values.dart';
 import 'add_student.dart';
 
 class HomePage extends StatelessWidget {
@@ -40,7 +46,7 @@ class HomePage extends StatelessWidget {
             tooltip: "Add student",
             icon: const Icon(Icons.add),
             onPressed: () {
-              Get.to(() => const AddStudentPage());
+              Get.to(() => AddStudentPage());
             },
           )
         ],
@@ -56,31 +62,37 @@ class HomePage extends StatelessWidget {
               // Otherwise, return list of students
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Obx(() => Get.find<StudentListController>().count > 0 ? ListView.builder(
+                child: Obx(() => Get.find<StudentListController>().count > 0 ? StaggeredGridView.countBuilder(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: Get.find<StudentListController>().count,
                   itemBuilder: (context, index) {
                     // Return student card
-                    return StudentCard(student: Get.find<StudentListController>().at(index), onDelete: (student) {
-                      showDeleteConfirmation(context, student);
-                    });
+                    return StudentCard(
+                      student: Get.find<StudentListController>().at(index),
+                      onDelete: (student) {
+                        showDeleteConfirmation(student);
+                      }
+                    );
                   },
+                  staggeredTileBuilder: (int index) => const StaggeredTile.fit(1)
                 ) : SizedBox(
-                  height: MediaQuery.of(context).size.height - 200,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Text("No students found"),
-                      ],
-                    ),
+                  height: MediaQuery.of(context).size.height - 100,
+                  child: const Center(
+                    child: Text("No students found"),
                   ),
                 )),
               );
             }
 
-            return const Center(child: CircularProgressIndicator());
+            return SizedBox(
+              height: MediaQuery.of(context).size.height - 100,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
           }
         ),
       )
@@ -88,63 +100,50 @@ class HomePage extends StatelessWidget {
   }
 
   /// Show a dialog to confirm the deletion of a student
-  void showDeleteConfirmation(context, Student student) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Delete student"),
-          content: const Text("Are you sure you want to delete this student?"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () async {
-                // Close dialog
-                Get.back();
+  void showDeleteConfirmation(Student student) {
+    showCustomDialog("Delete student", "Are you sure you want to delete this student?", [
+      TextButton(
+        onPressed: () {
+          Get.back();
+        },
+        child: const Text("Cancel"),
+      ),
+      TextButton(
+        onPressed: () async {
+          // Close dialog
+          Get.back();
 
-                // Check if student has an id
-                if (student.id == null) {
-                  showDeleteError(context);
-                  return;
-                }
+          // Check if student has an id
+          if (student.id == null) {
+            showDeleteError();
+            return;
+          }
 
-                // Delete student from database
-                await StudentDatabase.instance.deleteStudent(student);
-                // Delete student from list
-                Get.find<StudentListController>().deleteStudent(student);
-              },
-              child: const Text("Delete"),
-            ),
-          ],
-        );
-      }
-    );
+          // Delete student from database
+          await StudentDatabase.instance.deleteStudent(student);
+          // Delete student from list
+          Get.find<StudentListController>().deleteStudent(student);
+          // Delete student image
+          await File("${Values.appDirectory!.path}/${student.image}").delete();
+        },
+        child: const Text("Delete"),
+      ),
+    ]);
   }
 
-  void showDeleteError(context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Get.theme.colorScheme.errorContainer,
-        title: const Text("Error"),
-        content: const Text("An error occured while deleting this student!"),
-        actions: [
-          TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: Get.theme.colorScheme.onErrorContainer
-            ),
-            onPressed: () {
-              Get.back();
-            },
-            child: const Text("Ok"),
-          ),
-        ],
-      )
-    );
+
+  /// Show an error dialog when an error occured during deleting a student
+  void showDeleteError() {
+    showCustomDialog("Error", "An error occured while deleting this student!", [
+      TextButton(
+        style: TextButton.styleFrom(
+          foregroundColor: Get.theme.colorScheme.onErrorContainer
+        ),
+        onPressed: () {
+          Get.back();
+        },
+        child: const Text("Ok"),
+      ),
+    ]);
   }
 }

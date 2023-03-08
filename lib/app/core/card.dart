@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:dough/dough.dart';
+import 'package:get/get.dart';
+import 'package:studentapp/app/global/values.dart';
 
 import 'student.dart';
 
@@ -13,23 +17,47 @@ class StudentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return PressableDough(
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),      
-        child: ListTile(
-          onTap: () {
-    
-          },
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          title: Text(student.name),
-          subtitle: Text(student.course),
-          trailing: IconButton(
-            icon: const Icon(Icons.delete_outline_rounded),
-            onPressed: () {
-              onDelete(student);
-            },
-          ),
-        )
+        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+        semanticContainer: true,
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        color: Theme.of(context).colorScheme.surfaceVariant,
+        child: Flex(
+          direction: Axis.vertical,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(File("${Values.appDirectory!.path}/${student.image}"), fit: BoxFit.cover, width: double.infinity, height: 150)
+              )
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: Flex(
+                direction: Axis.vertical,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(student.name, style: Get.textTheme.titleLarge)
+                  ),
+                  Text(student.course),
+                  Flex(
+                    direction: Axis.horizontal,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      FilledButton(
+                        onPressed: () => onDelete(student),
+                        child: const Text("Delete")
+                      )
+                    ],
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:studentapp/app/controllers/student_list.dart';
 
 import 'app/db/students.dart';
+import 'app/global/values.dart';
 import 'app/theme/theme.dart';
 import 'app/views/home.dart';
 
-late Database db;
 late bool isDarkMode;
 
 void main() async { 
   WidgetsFlutterBinding.ensureInitialized();
 
-  db = await StudentDatabase.instance.database;
+  // Get dark mode setting
   isDarkMode = await StudentDatabase.instance.getDarkMode();
+  // Set app directory
+  Values.appDirectory = (await getExternalStorageDirectory());
 
   runApp(const MyApp());
 }
