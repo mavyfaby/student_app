@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:studentapp/app/controllers/student_list.dart';
+import 'package:get/get.dart';
 
+import 'app/controllers/student_list.dart';
 import 'app/db/students.dart';
 import 'app/global/values.dart';
 import 'app/theme/theme.dart';

@@ -25,7 +25,7 @@ class StudentDatabase {
       join(await getDatabasesPath(), 'mavystudent.db'),
       onCreate: (db, version) async {
         // First time the database is created
-        await db.execute("CREATE TABLE $table (id INTEGER PRIMARY KEY, name TEXT, image BLOB, course TEXT)");
+        await db.execute("CREATE TABLE $table (id INTEGER PRIMARY KEY, name TEXT, image TEXT, course TEXT)");
         await db.execute("CREATE TABLE settings (id INTEGER PRIMARY KEY, name TEXT, value TEXT)");
 
         // Insert dark mode setting
@@ -36,8 +36,8 @@ class StudentDatabase {
   }  
 
   // Get students
-  Future<List<Student>> getStudents() async {
-    final List<Map<String, Object?>> result = await (await database).query(table);
+  Future<List<Student>> getStudents(String name) async {
+    final List<Map<String, Object?>> result = await (await database).query(table, where: "name LIKE ?", whereArgs: ["%$name%"], orderBy: "id DESC");
     return result.map((e) => Student.fromMap(e)).toList();
   }
 

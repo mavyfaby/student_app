@@ -21,7 +21,7 @@ class StudentListController extends GetxController {
   }
 
   void addStudent(Student student) {
-    _students.add(student);
+    _students.insert(0, student);
     update();
 
   }
