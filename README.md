@@ -1,16 +1,13 @@
-# studentapp
+# Student app
 
-A new Flutter project.
+A student app, crafted with Flutter and Material 3 design, comes equipped with an sqlite database for persistent records.
 
-## Getting Started
+## Author
 
-This project is a starting point for a Flutter application.
+- [mavyfaby](https://github.com/mavyfaby) (Maverick G. Fabroa)
 
-A few resources to get you started if this is your first Flutter project:
+## Screenshots
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+#1 | #2 | #3
+--- | --- | --- | 
+![Screenshot 1](/screenshots/sc1.jpg) | ![Screenshot 2](/screenshots/sc2.jpg) | ![Screenshot 3](/screenshots/sc3.jpg)

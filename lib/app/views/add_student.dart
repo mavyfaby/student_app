@@ -226,7 +226,7 @@ class AddStudentPage extends StatelessWidget {
     final String destination = "${directory!.path}/$imageName";
 
     // Compress image and copy the image to the app's directory with image_timestamp.ext
-     await compressImageAndCopy(image, destination);
+    await compressImageAndCopy(image, destination);
   
     // Remove the image from cache
     _clearImageCache();
